@@ -1,0 +1,335 @@
+<html>
+
+<style>
+.chart {
+
+}
+
+.main text {
+    font: 10px sans-serif;	
+}
+
+.axis line, .axis path {
+    shape-rendering: crispEdges;
+    stroke: black;
+    fill: none;
+}
+
+circle {
+    fill: steelblue;
+}
+
+div.tooltip {   
+  position: absolute;           
+  text-align: center;           
+  width: 60px;                  
+  height: 28px;                 
+  padding: 2px;             
+  font: 12px sans-serif;        
+  background: yellow;   
+  border: 0px;      
+  border-radius: 8px;           
+  pointer-events: none;         
+}
+
+</style>
+
+<link rel="stylesheet" href="styleguide.css">
+<script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>
+
+<pheading>Welcome to Director!</pheading>
+
+<p>
+    <head>
+        <title>Sphero Director</title>
+        <script>
+
+var div = d3.select("body").append("div")   
+    .attr("class", "tooltip")               
+    .style("opacity", 0);
+
+        function coordinate(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+
+var coord = []
+
+var message = "Coordinates: \n";
+
+function enter_coordinate()
+{
+    var text_box = document.getElementById('type_box');
+    var text_boxy = document.getElementById('type_box2');
+
+    var results_box = document.getElementById('output');
+
+    var text = parseInt(text_box.value);
+    var texty = parseInt(text_boxy.value);
+
+    //coord.push('(' + text + ')');
+    coord.push(new coordinate(text, texty))
+
+    console.log("coord length: ", coord.length);
+
+    console.log("coordinates: ", coord);
+
+    //var message = "Coordinates: \n"; //+ text;
+
+    var add_point = '(' + text + ',' + texty + ')';
+
+    message += add_point + "\n"; //coord; //text + "\n";
+    console.log(coord);
+    results_box.innerHTML = message;
+
+    document.getElementById('type_box').value = "";
+    document.getElementById('type_box2').value = "";
+
+    d3.select("svg").remove();
+
+    var data = coord; //[[250, 250], [20, 400], [50, 200], [30, 60]];
+   
+    var margin = {top: 20, right: 15, bottom: 60, left: 60}
+      , width = 960 - margin.left - margin.right
+      , height = 500 - margin.top - margin.bottom;
+    
+    var x = d3.scale.linear()
+              .domain([0, d3.max(data, function(d) { return d.x; })])
+              .range([ 0, width ]);
+    
+    var y = d3.scale.linear()
+              .domain([0, d3.max(data, function(d) { return d.y; })])
+              .range([ height, 0 ]);
+ 
+    var chart = d3.select('body')
+    .append('svg:svg')
+    .attr('width', width + margin.right + margin.left)
+    .attr('height', height + margin.top + margin.bottom)
+    .attr('class', 'chart')
+
+    var main = chart.append('g')
+    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+    .attr('width', width)
+    .attr('height', height)
+    .attr('class', 'main')   
+        
+    // draw the x axis
+    var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient('bottom');
+
+    main.append('g')
+    .attr('transform', 'translate(0,' + height + ')')
+    .attr('class', 'main axis date')
+    .call(xAxis);
+
+    // draw the y axis
+    var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient('left');
+
+    main.append('g')
+    .attr('transform', 'translate(0,0)')
+    .attr('class', 'main axis date')
+    .call(yAxis);
+
+    var g = main.append("svg:g"); 
+    
+    g.selectAll("scatter-dots")
+      .data(data)
+      .enter().append("svg:circle")
+          .attr("cx", function (d,i) { console.log("dot x: ", x(d.x)); return x(d.x); } )
+          .attr("cy", function (d) { return y(d.y); } )
+          .on("mouseover", function(d) {      
+            div.transition()        
+                .duration(200)      
+                .style("opacity", .9); 
+            div.html(d.x + "," + d.y)  
+                .style("left", (d3.event.pageX) + "px")     
+                .style("top", (d3.event.pageY - 28) + "px");   })
+        .on("mouseout", function(d) {       
+            div.transition()        
+                .duration(500)      
+                .style("opacity", 0);   
+        })       
+        .attr("r", 8);
+
+    var lineFunction = d3.svg.line()
+                        .x(function(d, i) {  return x(d.x) + margin.left; })
+                         .y(function(d, i) { return y(d.y) + margin.top; })
+                        .interpolate("linear");
+
+    var lineGraph = chart.append("path")
+                            .attr("d", lineFunction(coord))
+                            .attr("stroke", "orange")
+                            .attr("stroke-width", 2)
+                            .attr("fill", "none");
+
+    /*var i = 0;
+    
+    console.log("i: ", i, " coord length: ", coord.length);
+
+    var valueline = d3.svg.line()
+    .x(function(d) { console.log("D: ", d, coord.x); return x(d.x); })
+    .y(function(d) { return y(d.y); });
+
+    console.log("valueline: ", valueline);
+
+    chart.append("path")
+        //.attr("class", "line")
+        .attr("d", valueline(data)); */
+
+    /*while (coord.length > 1 && i < coord.length-1) {
+        console.log("i: ", i);
+        console.log("HERE");
+        var j = i + 1;
+
+        //console.log("coord x: ",coord[i+1].x);
+        console.log(coord[i], coord[j]);
+
+
+        chart.append("line")
+        .attr("transform", "translate(0," + 290 + ")")
+      
+        .attr("x1", coord[i].x)
+        .attr("y1", coord[i].y)
+        .attr("x2", coord[j].x)
+        .attr("y2", coord[j].y)
+        .attr("stroke-width", 2)
+        .attr("stroke", "black");
+
+        g.append("line")
+        .attr("transform", "translate(0," + 290 + ")")
+      
+        .attr("x1", coord[i].x)
+        .attr("y1", coord[i].y)
+        .attr("x2", coord[j].x)
+        .attr("y2", coord[j].y)
+        .attr("stroke-width", 2)
+        .attr("stroke", "black");
+
+        g.append("path")
+      .datum(coord)
+      .attr("class", "line")
+      .attr("d", line);
+
+
+        i++;
+    } */
+
+}
+
+function finish_coordinates(){
+    console.log(coord);
+}
+
+</script>
+
+    
+    <body>
+    	<h2> Enter Coordinates: </h2>
+        X <input type="text" id="type_box" label = "Hello"/>
+        Y <input type="texty" id="type_box2" />
+
+        <button onclick="enter_coordinate()">Enter</button>
+        <p>
+        <div id="output">Coordinates:</div>
+        <p>
+        <button onclick="finish_coordinates()">Finish Adding Coordinates</button>
+    </body>
+
+
+
+
+<!--
+<script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>
+      </head>
+      <body>
+        <div class='content'>
+          
+        </div>
+        <script type="text/javascript" src="scatterchart.js"></script>
+ </body>
+<-->
+
+
+      <body>
+        <div class='content'>
+          
+        </div>
+
+        <script>
+//from: http://bl.ocks.org/bunkat/2595950
+
+console.log("graph: ", coord);
+
+var data = coord //[[250, 250], [20, 400], [50, 200], [30, 60]];
+   
+    var margin = {top: 20, right: 15, bottom: 60, left: 60}
+      , width = 960 - margin.left - margin.right
+      , height = 500 - margin.top - margin.bottom;
+    
+    var x = d3.scale.linear()
+              .domain([0, d3.max(data, function(d) { return d.x; })])
+              .range([ 0, width ]);
+    
+    var y = d3.scale.linear()
+              .domain([0, d3.max(data, function(d) { return d.y; })])
+              .range([ height, 0 ]);
+ 
+    var chart = d3.select('body')
+    .append('svg:svg')
+    .attr('width', width + margin.right + margin.left)
+    .attr('height', height + margin.top + margin.bottom)
+    .attr('class', 'chart')
+
+    var main = chart.append('g')
+    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+    .attr('width', width)
+    .attr('height', height)
+    .attr('class', 'main')   
+        
+    // draw the x axis
+    var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient('bottom');
+
+    main.append('g')
+    .attr('transform', 'translate(0,' + height + ')')
+    .attr('class', 'main axis date')
+    .call(xAxis);
+
+    // draw the y axis
+    var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient('left');
+
+    main.append('g')
+    .attr('transform', 'translate(0,0)')
+    .attr('class', 'main axis date')
+    .call(yAxis);
+
+    var g = main.append("svg:g"); 
+    
+    g.selectAll("scatter-dots")
+      .data(data)
+      .enter().append("svg:circle")
+          .attr("cx", function (d,i) { return x(d.x); } )
+          .attr("cy", function (d) { return y(d.y); } )
+          .attr("r", 8);
+
+
+</script>
+<p>
+
+<!--
+    <h2> Interactive Coordinates</h2>
+
+<div class="clearfix">
+<div style="width:230px;height:20px;text-align:center;clear:both;">X</div>
+<div style="width:20px;padding-top:40px;float:left;">Y</div>
+<div style="width:402px;float:left"><iframe src="trycanvas_coordinates.htm" frameborder="0" style="border:0;overflow:hidden;width:400px;height:120px;"></iframe></div>
+</div>
+-->
+
+</html>
