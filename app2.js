@@ -31,10 +31,10 @@ function roll_distance(x1, y1, x2, y2, speed){
   var direction_rad = Math.atan2(y2-y1, x2-x1);
   var direction = direction_rad * 180 / Math.PI;
 
-  if (direction < 0){
+  /*if (direction < 0){
     console.log("Negative direction: ", direction);
     direction = 360 + direction
-  }
+  }*/
 
   /*setInterval(function() {
       orb.roll(speed, direction);
@@ -71,7 +71,7 @@ orb.connect(function() {
 
       //roll_distance(curr_x, curr_y, curr_x + coordinates[i].x, curr_y + coordinates[i].y, 180);
       while (Math.abs(curr_x - coordinates[i].x) > 10 || Math.abs(curr_y - coordinates[i].y) > 10){
-        roll_distance(curr_x, curr_y, coordinates[i].x, coordinates[i].y, 180);
+        roll_distance(curr_x, curr_y, curr_x + coordinates[i].x, curr_y + coordinates[i].y, 180);
 
         console.log(curr_x, curr_y, coordinates[i].x, coordinates[i].y);
         console.log("i: ", i, "(x,y): ", data.xOdometer.value[0], ",", data.yOdometer.value[0]);
@@ -88,7 +88,11 @@ orb.connect(function() {
 }
 
 var coordinates = [];
-add_coord(300, 20, coordinates);
-add_coord(3, 4, coordinates);
+//add_coord(100, 20, coordinates);
+
+
+add_coord(100, 50, coordinates);
+add_coord(0, 80, coordinates);
+add_coord(50, 60, coordinates);
 
 direct(coordinates);
