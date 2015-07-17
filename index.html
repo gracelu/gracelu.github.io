@@ -279,6 +279,7 @@ var orb = sphero("COM4");*/
 var sphero = require("sphero");
 var orb = sphero("COM4");
 
+
 function coordinate(x, y) {
     this.x = x;
     this.y = y;
@@ -327,7 +328,8 @@ var i=0;
 
 orb.connect(function() {
 
-  
+  orb.color({ red: 255, green: 0, blue: 10 });
+
   var curr_x, curr_y;
 
   orb.streamOdometer();
